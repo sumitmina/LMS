@@ -33,10 +33,3 @@ app.get("/",(req,res)=>{
 
 //user route
 app.post('/clerk', express.json(), clearkWebhooks)
-
-// //routes import 
-// import userRouter from "./routes/user.routes.js"
-// import { clearkWebhooks } from "./controllers/webHooks.controller.js";
-
-// //routes declaration
-// app.use("/api/v1/users",userRouter);
