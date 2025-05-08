@@ -5,7 +5,7 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "server": "nodemon -r dotenv/config --experimental-json-modules src/server.js",
+    "server": "nodemon -r dotenv/config --experimental-json-modules server.js",
     "start": "node server.js"
   },
   "author": "Sumit Mina",
