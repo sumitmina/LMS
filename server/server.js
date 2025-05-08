@@ -2,6 +2,7 @@ import express from "express"
 import cors from "cors"
 import connectDB from "./db/index.js";
 import dotenv from "dotenv"
+import { clearkWebhooks } from "./controllers/webHooks.controller.js";
 
 dotenv.config({
     path: "./.env"
@@ -29,8 +30,13 @@ app.get("/",(req,res)=>{
     res.send("API WORKING")
 })
 
-//routes import 
-import userRouter from "./routes/user.routes.js"
 
-//routes declaration
-app.use("/api/v1/users",userRouter);
+//user route
+app.post('/clerk', express.json(), clearkWebhooks)
+
+// //routes import 
+// import userRouter from "./routes/user.routes.js"
+// import { clearkWebhooks } from "./controllers/webHooks.controller.js";
+
+// //routes declaration
+// app.use("/api/v1/users",userRouter);
