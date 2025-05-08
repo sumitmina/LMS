@@ -8,6 +8,10 @@ app.use(cors({
     credentials: true
 }))
 
+app.get("/",(req,res)=>{
+    res.send("API WORKING")
+})
+
 //routes import 
 import userRouter from "./routes/user.routes.js"
 
