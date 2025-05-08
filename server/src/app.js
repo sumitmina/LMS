@@ -3,9 +3,11 @@ import cors from "cors"
 
 const app=express()
 
-app.use(cors({
-    origin: process.env.CORS_ORIGIN,  
-}))
+// app.use(cors({
+//     origin: process.env.CORS_ORIGIN,  
+// }))
+
+app.use(cors())
 
 app.get("/",(req,res)=>{
     res.send("API WORKING")
