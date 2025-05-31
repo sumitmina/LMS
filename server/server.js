@@ -2,7 +2,8 @@ import express from "express"
 import cors from "cors"
 import connectDB from "./db/index.js";
 import dotenv from "dotenv"
-import { clearkWebhooks } from "./controllers/webHooks.controller.js";
+import { clearkWebhooks, stripeWebhooks } from "./controllers/webHooks.controller.js";
+import { clerkMiddleware } from "@clerk/express";
 
 dotenv.config({
     path: "./.env"
@@ -10,9 +11,12 @@ dotenv.config({
 
 const app = express();
 
+//middlewares
 app.use(cors({
     origin: process.env.CORS_ORIGIN,  
 }))
+app.use(clerkMiddleware())
+
 
 // connect to database
 connectDB()
@@ -33,3 +37,22 @@ app.get("/",(req,res)=>{
 
 //user route
 app.post('/clerk', express.json(), clearkWebhooks)
+
+//educator routes
+import educatorRouter from "./routes/educator.route.js"
+
+app.use('/api/educator', express.json(), educatorRouter)
+
+//course routes
+import courseRouter from "./routes/course.route.js"
+
+app.use('/api/course', express.json(), courseRouter)
+
+// user routes
+import userRouter from "./routes/user.route.js"
+
+app.use('/api/user', express.json(), userRouter)
+// we are using express.json() -> just to make sure that all requests will be passed in json format 
+
+// stripe routes
+app.post('/stripe', express.raw({type: 'application/json'}), stripeWebhooks)

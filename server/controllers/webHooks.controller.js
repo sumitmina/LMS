@@ -1,8 +1,11 @@
-import {Webhook} from "svix"
+import {EndpointSecretOut, Webhook} from "svix"
 import { User } from "../models/user.model.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
+import Stripe from "stripe"
+import { Purchase } from "../models/purchase.model.js"
+import { Course } from "../models/course.model.js"
 
 export const clearkWebhooks = asyncHandler(async (req,res) => {
     try{
@@ -66,4 +69,75 @@ export const clearkWebhooks = asyncHandler(async (req,res) => {
         throw new ApiError(500,err.message);
     }
 })
+
+const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY)
+
+export const stripeWebhooks = asyncHandler( async (request,response) => {
+    const sig = request.header['stripe-signature']
+
+    let event;
+
+    try{
+        event = Stripe.webhooks.constructEvent(request.body, sig, process.env.STRIPE_SECRET_KEY);
+    }
+    catch(err){
+        throw new ApiError(400,err.message);
+    }
+
+    // handle the event
+    switch(event.type){
+        case 'payment_intent.succeeded':{
+            const paymentIntent = event.data.object;
+            const paymentIntentId = paymentIntent.id;
+
+            const session = await stripeInstance.checkout.sessions.list({
+                payment_intent: paymentIntentId
+            })
+
+            const {purchaseId} = session.data[0].metadata;
+
+            const purchaseData = await Purchase.findById(purchaseId)
+            const userData = await User.findById(purchaseData.userId)
+            const courseData = await Course.findById(purchaseData.courseId.toString())
+
+            courseData.enrolledStudents.push(userData)
+            await courseData.save()
+
+            userData.enrolledCourses.push(courseData._id)
+            await userData.save()
+
+            purchaseData.status = 'completed'
+
+            await purchaseData.save()
+
+            break;
+        }
+
+        case 'payment_intent.payment_failed':{
+            const paymentIntent = event.data.object;
+            const paymentIntentId = paymentIntent.id;
+
+            const session = await stripeInstance.checkout.sessions.list({
+                payment_intent: paymentIntentId
+            })
+
+            const {purchaseId} = session.data[0].metadata;
+
+            const purchaseData = await Purchase.findById(purchaseId)
+            purchaseData.status = 'failed'
+
+            await purchaseData.save()
+            break;
+        }
+
+        default:
+            console.log(`Unhandled event type ${event.type}`);
+    }
+
+    // return a response to acknowledge receipt of the event
+    response.json({received: true});
+})
+
+
+
 
