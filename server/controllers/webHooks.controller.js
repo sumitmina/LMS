@@ -73,16 +73,19 @@ export const clearkWebhooks = asyncHandler(async (req,res) => {
 const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 export const stripeWebhooks = asyncHandler( async (request,response) => {
-    const sig = request.header['stripe-signature']
+    const sig = request.headers['stripe-signature']
 
     let event;
 
     try{
-        event = Stripe.webhooks.constructEvent(request.body, sig, process.env.STRIPE_SECRET_KEY);
+        event = Stripe.webhooks.constructEvent(request.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
     }
     catch(err){
-        throw new ApiError(400,err.message);
+        return response.status(400).send(`Webhook Error: ${err.message}`);
     }
+
+    console.log(event.type);
+    
 
     // handle the event
     switch(event.type){
