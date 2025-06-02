@@ -5,6 +5,7 @@ import { User } from "../models/user.model.js";
 import { Purchase } from "../models/purchase.model.js";
 import Stripe from "stripe"
 import { Course } from "../models/course.model.js";
+import { CourseProgress } from "../models/courseProgress.model.js";
 
 // get user data
 const getUserData = asyncHandler( async (req,res) => {
@@ -95,8 +96,109 @@ const purchaseCourse = asyncHandler( async (req,res) => {
     }
 })
 
+// update user course progress
+const updateUserCourseProgress = asyncHandler( async (req, res) => {
+    try{
+        const userId = req.auth.userId
+        const {courseId, lectureId} = req.body
+        const progressData = await CourseProgress.findOne({userId, courseId})
+
+        if(progressData){
+            if(progressData.lectureCompleted.includes(lectureId)){
+                res.status(200).json(
+                    new ApiResponse(200,{},"Lecture Already Completed")
+                )
+            }
+            progressData.lectureCompleted.push(lectureId)
+            await progressData.save()
+        }else{
+            // create the progress data if is not present
+            await CourseProgress.create({
+                userId,
+                courseId,
+                lectureCompleted: [lectureId]
+            })
+        }
+
+        res.json(
+            new ApiResponse(200, {}, 'progress updated')
+        )
+    }catch(err){
+        throw new ApiError(500,err.message)
+    }
+})
+
+// get user couse progress
+const getUserCourseProgress = asyncHandler( async (req,res) => {
+    try {
+        const userId = req.auth.userId
+        const {courseId} = req.body
+        const progressData = await CourseProgress.findOne({userId, courseId})
+        res.status(200).json(
+            new ApiResponse(200, progressData, "")
+        )
+    } catch (error) {
+        throw new ApiError(error.message)
+    }
+})
+
+// add user ratings to course
+const userRating = asyncHandler( async (req,res) => {
+    const userId = req.auth.userId
+    const {courseId, rating} = req.body
+
+    if(!userId){
+        throw new ApiError(400,"UserId is mandatory")
+    }
+    if(!courseId){
+        throw new ApiError(400,"Course Id is mandatory")
+    }
+    if(!rating){
+        throw new ApiError(400, "Rating is not provided")
+    }
+    if(rating < 1 || rating > 5){
+        throw new ApiError(400, "Rating is out of bound")
+    }
+
+    try{
+        const course = await Course.findById(courseId)
+        if(!course){
+            throw new ApiError(400, "course not found")
+        }
+
+        const user = await User.findById(userId)
+        if(!user || !user.enrolledCourses.includes(courseId)){
+            throw new ApiError(400, "Invalid user or user not enrolled for this course")
+        }
+
+        // check if user already rated this course
+        // if yes then find the index of that object
+        const existingRatingIndex = course.courseRatings.findIndex(r => r.userId === userId);
+
+        // if rating already exist then update the rating for the user
+        if(existingRatingIndex > -1){
+            course.courseRatings[existingRatingIndex].rating = rating;
+        }else{
+            course.courseRatings.push({
+                userId,
+                rating
+            })
+        }
+        await course.save()
+
+        res.status(200).json(
+            new ApiResponse(200, {}, "Rating Updated")
+        )
+    }catch(err){
+        throw new ApiError(500, err.message)
+    }
+})
+
 export{
     getUserData,
     userEnrolledCourses,
-    purchaseCourse
+    purchaseCourse,
+    getUserCourseProgress,
+    updateUserCourseProgress,
+    userRating
 }
