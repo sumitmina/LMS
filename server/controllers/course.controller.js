@@ -8,14 +8,18 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 // get all courses which are published
 const getAllCourses = asyncHandler( async (req,res) => {
     try{
-        const courses = await Course.find({isPublished: true}).select([
-            "-courseContent", "-enrolledStudents"]).populate({path: "educator"})
+        const allCourses = await Course.find({isPublished: true}).select([
+            "-courseContent", "-enrolledStudents"]).populate({ path: 'educator' })
 
         res.status(200).json(
-            new ApiResponse(200,courses, "All courses fetched successfully")
+            {
+                success: 'true',
+                courses: allCourses
+            }
+            // new ApiResponse(200,courses, "All courses fetched successfully")
         )
     }catch(err){
-        throw new ApiError(500,"There is some error while fetching all courses")
+        throw new ApiError(500,"There is some error while fetching the course")
     }
 })
 

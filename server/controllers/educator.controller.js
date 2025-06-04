@@ -21,7 +21,7 @@ const updateRoleToEducator = asyncHandler( async (req,res) => {
         )
     }
     catch(err){
-        throw new ApiError(500,"There is a problem while updating the role")
+        throw new ApiError(500,err.message)
     }
 })
 
@@ -49,6 +49,7 @@ const addCourse = asyncHandler( async (req,res) => {
 
     }
     catch(err){
+        //"There is a problem while adding the course"
         throw new ApiError(500,"There is a problem while adding the course") //if any error you can just check thr error by replacing the error message with err.message
     }
 })

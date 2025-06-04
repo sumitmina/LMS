@@ -3,6 +3,8 @@ import { assets } from '../../assets/assets.js'
 import {Link, useNavigate} from "react-router-dom"
 import {useClerk, UserButton, useUser} from "@clerk/clerk-react"
 import { AppContext } from '../../context/AppContext.jsx'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
 const Navbar = () => {
 
@@ -16,7 +18,35 @@ const Navbar = () => {
     navigate("/")
   }
 
-  const {isEducator} = useContext(AppContext)
+  const {isEducator, backendUrl, setIsEducator, getToken} = useContext(AppContext)
+
+  const becomeEducator = async () => {
+    try{
+      if(isEducator){
+        navigate('/educator')
+        return
+      }
+      const token = await getToken()
+      
+      const {data} =  await axios.post(
+        backendUrl + '/api/educator/update-role', 
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+      
+      if(data.success){
+        setIsEducator(true)
+        toast.success(data.message)
+      }else{
+        toast.error(data.message)
+      }
+    }catch(err){
+      toast.error(err.message)
+    }
+  }
 
   return (
     <div className={`flex items-centre justify-between px-4 sm:px-10 md:px-14 lg:px-36 border-b border-gray-500 py-4 ${isCourseListPage ? "bg-white" : 'bg-cyan-100/70'} `}>
@@ -26,7 +56,7 @@ const Navbar = () => {
             {
               user && 
               <>
-              <button onClick={()=>{navigate('/educator')}}>{isEducator ? 
+              <button onClick={becomeEducator}>{isEducator ? 
               "Educator Dashboard" : "Become Educator"}</button> | <Link to="/my-enrollments">My Enrollments</Link>
               </>
             }
@@ -44,7 +74,7 @@ const Navbar = () => {
             {
               user && 
               <>
-              <button onClick={()=>{navigate('/educator')}}>{isEducator ? 
+              <button onClick={becomeEducator}>{isEducator ? 
               "Educator Dashboard" : "Become Educator"}</button> | <Link to="/my-enrollments">My Enrollments</Link>
               </>
             }

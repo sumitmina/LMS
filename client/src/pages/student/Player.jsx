@@ -23,10 +23,11 @@ const Player = () => {
   const getCourseData = () => {
     enrolledCourses.map((course) => {
       if(course._id === courseId){
-        setCourseData(course)
+        setCourseData(course)        
       }
     })
   }
+  
 
   const toggleSection = (index) => {
     setOpenSection((prev)=>(
