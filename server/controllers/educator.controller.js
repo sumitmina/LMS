@@ -5,6 +5,8 @@ import { ApiResponse } from '../utils/ApiResponse.js';
 import { Course } from '../models/course.model.js';
 import { uploadOnCloudinary } from '../utils/cloudinary.js';
 import { Purchase } from '../models/purchase.model.js';
+import path from 'path';
+import { User } from '../models/user.model.js';
 
 // to update role to educator
 const updateRoleToEducator = asyncHandler( async (req,res) => {
@@ -89,7 +91,7 @@ const educatorDashboardData = asyncHandler( async (req,res) => {
         for(const course of courses){
             const students = await User.find({
                 _id: {$in: course.enrolledStudents}
-            }, 'name imageUrl');
+            }, 'fullName avatar');
 
             students.forEach(student => {
                 enrolledStudentsData.push({
@@ -109,7 +111,7 @@ const educatorDashboardData = asyncHandler( async (req,res) => {
         }})
 
     }catch(err){
-        throw new ApiError(500, "Something went wrong while fetching educator dashboard data")
+        throw new ApiError(500, err.message)
     }
 })
 
@@ -123,7 +125,7 @@ const getEnrolledStudentsData = asyncHandler(async (req,res) => {
         const purchases = await Purchase.find({
             courseId: {$in : courseIds},
             status: 'completed'
-        }).populate('userId','name imageUrl').populate('courseId','courseTitle')
+        }).populate({path: 'userId'}).populate('courseId')
 
         const enrolledStudents = purchases.map(purchase => ({
             student: purchase.userId,
@@ -136,7 +138,7 @@ const getEnrolledStudentsData = asyncHandler(async (req,res) => {
         )
 
     }catch(err){
-        throw new ApiError(500, "Error while fetching enrolled students data")
+        throw new ApiError(500, err.message)
     }
 })
 

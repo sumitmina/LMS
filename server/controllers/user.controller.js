@@ -21,7 +21,7 @@ const getUserData = asyncHandler( async (req,res) => {
             new ApiResponse(200, user, "User data fetched successfully")
         )
     }catch(err){
-        throw new ApiError(500, "Something went wrong while fetching user data")
+        throw new ApiError(500,"Something went wrong while fetching user data. Please try again later")
     }
 })
 
@@ -138,7 +138,7 @@ const getUserCourseProgress = asyncHandler( async (req,res) => {
             new ApiResponse(200, progressData, "")
         )
     } catch (error) {
-        throw new ApiError(error.message)
+        throw new ApiError(500,error.message)
     }
 })
 
