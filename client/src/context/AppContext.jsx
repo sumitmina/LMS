@@ -28,12 +28,6 @@ export const AppContextProvider = (props) => {
 
     const {getToken} = useAuth()
     const {user} = useUser()
-
-    const loginToken = async ()=>{
-        const token = await getToken()
-        console.log(token);
-        
-    }
     
 
     //fetch all courses
@@ -94,8 +88,7 @@ export const AppContextProvider = (props) => {
 
 
     useEffect(()=>{
-        fetchAllCourses(),
-        loginToken()
+        fetchAllCourses()
     },[])
 
     //function to calculate average rating of course
