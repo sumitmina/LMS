@@ -7,7 +7,7 @@ const Footer = () => {
         <div className='flex flex-col md:flex-row items-start px-8 md: px-0 justify-center gap-10 md:gap-32 py-10 border-b border-white/30'>
             <div className='flex flex-col md:items-start items-center w-full'>
                 <img src={assets.logo_dark} alt="Logo" />
-                <p className='mt-6 text-center md:text-left text-sm text-white/80'>Lorem ipsum dolor sit amet, consectetur adipisicing elit.  Maiores, quod. Doloremque, consectetur autem. Laudantium, adipisci harum. Illo doloremque aliquam quae!</p>
+                <p className='mt-6 text-center md:text-left text-sm text-white/80'>Edemy – Your smart LMS for seamless learning. Track progress, explore courses, and grow anytime, anywhere</p>
             </div>
             <div className='flex flex-col md:items-start items-center w-full'>
                 <h2 className='font-semibold text-white mb-5'>Company</h2>
