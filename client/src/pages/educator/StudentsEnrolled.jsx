@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { dummyStudentEnrolled } from '../../assets/assets'
 import Loading from '../../components/student/Loading'
 import { AppContext } from '../../context/AppContext'
 import axios from 'axios'
@@ -14,6 +13,7 @@ const StudentsEnrolled = () => {
     try {
       const token = await getToken()  
       const {data} = await axios.get(backendUrl + '/api/educator/enrolled-students', {headers: {Authorization: `Bearer ${token}`}})
+      console.log(data);
       
       if(data.success){
         setEnrolledStudents(data.data.reverse())
@@ -29,7 +29,7 @@ const StudentsEnrolled = () => {
     if(isEducator){
       fetchEnrolledStudents()
     }
-    
+
   },[isEducator])
 
   return enrolledStudents ? (
@@ -70,7 +70,8 @@ const StudentsEnrolled = () => {
         </table>
       </div>
     </div>
-  ) : <Loading />
+  )
+  : <Loading />
 }
 
 export default StudentsEnrolled
