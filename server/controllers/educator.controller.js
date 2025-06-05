@@ -42,7 +42,7 @@ const addCourse = asyncHandler( async (req,res) => {
         parsedCourseData.educator = educatorId
         const newCourse = await Course.create(parsedCourseData)
         const imageUpload = await uploadOnCloudinary(imageFile.path)
-        newCourse.courseThumbnail = imageUpload.secure_url
+        newCourse.courseThumbnail = imageUpload? imageUpload.secure_url : ""
         await newCourse.save()
 
         res.status(200).json(
